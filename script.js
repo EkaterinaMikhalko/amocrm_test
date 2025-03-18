@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const dealsTableBody = document.querySelector('#dealsTable tbody');
-    let accessToken = `null`;
+    let accessToken = `xy5IUF7GXKKe0pTQq5z1Mz5vRK7dgcIyjLNsEjKQkjXz9t9L6Q8T7QKFv1JCpW0u`;
 
     // Обработка ошибок авторизации
     window.handleAuthError = function(error) {
@@ -10,14 +10,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Функция для получения токена из URL (после авторизации)
     function getAccessTokenFromUrl() {
         const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
-        return urlParams.get('access_token');
+        const token = urlParams.get('access_token');
+        if (token) {
+            console.log('Токен получен из URL:', token);
+            return token;
+        } else {
+            console.log('Токен отсутствует в URL. Используется жестко заданный токен.');
+            return accessToken; // Используем жестко заданный токен, если его нет в URL
+        }
     }
 
     // Инициализация при загрузке страницы
     function init() {
         accessToken = getAccessTokenFromUrl();
         if (accessToken) {
-            console.log('Токен получен:', accessToken);
+            console.log('Токен:', accessToken);
             fetchDealsAndContacts();
         } else {
             console.log('Токен отсутствует. Необходима авторизация.');
@@ -32,7 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
+            if (!dealsResponse.ok) {
+                throw new Error(`Ошибка HTTP: ${dealsResponse.status}`);
+            }
             const dealsData = await dealsResponse.json();
+            console.log('Данные о сделках:', dealsData);
 
             for (const deal of dealsData._embedded.leads) {
                 const contactResponse = await fetch(`https://kattie.amocrm.ru/api/v4/contacts/${deal.contact_id}`, {
@@ -40,6 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         'Authorization': `Bearer ${accessToken}`
                     }
                 });
+                if (!contactResponse.ok) {
+                    throw new Error(`Ошибка HTTP: ${contactResponse.status}`);
+                }
                 const contactData = await contactResponse.json();
 
                 const row = document.createElement('tr');
@@ -75,6 +89,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
+            if (!dealDetailsResponse.ok) {
+                throw new Error(`Ошибка HTTP: ${dealDetailsResponse.status}`);
+            }
             const dealDetails = await dealDetailsResponse.json();
 
             const taskResponse = await fetch(`https://kattie.amocrm.ru/api/v4/tasks?filter[entity_id]=${dealId}`, {
@@ -82,6 +99,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
+            if (!taskResponse.ok) {
+                throw new Error(`Ошибка HTTP: ${taskResponse.status}`);
+            }
             const taskData = await taskResponse.json();
             const nearestTask = taskData._embedded.tasks[0];
 
@@ -120,8 +140,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обработчик для кнопки авторизации
     const authButton = document.querySelector('.amocrm_oauth');
-    authButton.addEventListener('click', function() {
-        // После успешной авторизации и получения токена, загрузим данные
-        init();
-    });
+    if (authButton) {
+        authButton.addEventListener('click', function() {
+            console.log('Кнопка авторизации нажата.');
+            // После успешной авторизации и получения токена, загрузим данные
+            init();
+        });
+    } else {
+        console.error('Кнопка авторизации не найдена.');
+    }
+
+    // Автоматически вызываем init при загрузке страницы, если токен уже есть
+    init();
 });
