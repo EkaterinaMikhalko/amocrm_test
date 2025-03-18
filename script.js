@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const dealsTableBody = document.querySelector('#dealsTable tbody');
-    let accessToken = `null`;
+    let accessToken = null;
 
     // Обработка ошибок авторизации
     window.handleAuthError = function(error) {
@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Токен получен из URL:', token);
             return token;
         } else {
-            console.log('Токен отсутствует в URL. Используется жестко заданный токен.');
-            return accessToken; // Используем жестко заданный токен, если его нет в URL
+            console.log('Токен отсутствует в URL.');
+            return null;
         }
     }
 
@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Функция для получения данных о сделках и контактах
     async function fetchDealsAndContacts() {
         try {
+            console.log('Загрузка данных о сделках...');
             const dealsResponse = await fetch('https://kattie.amocrm.ru/api/v4/leads', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
@@ -45,7 +46,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const dealsData = await dealsResponse.json();
             console.log('Данные о сделках:', dealsData);
 
+            if (!dealsData._embedded || !dealsData._embedded.leads) {
+                throw new Error('Нет данных о сделках.');
+            }
+
             for (const deal of dealsData._embedded.leads) {
+                console.log('Загрузка данных о контакте для сделки:', deal.id);
                 const contactResponse = await fetch(`https://kattie.amocrm.ru/api/v4/contacts/${deal.contact_id}`, {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
@@ -55,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error(`Ошибка HTTP: ${contactResponse.status}`);
                 }
                 const contactData = await contactResponse.json();
+                console.log('Данные о контакте:', contactData);
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
