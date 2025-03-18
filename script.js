@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const dealsTableBody = document.querySelector('#dealsTable tbody');
-    let accessToken = `null`;
+    let accessToken = `xy5IUF7GXKKe0pTQq5z1Mz5vRK7dgcIyjLNsEjKQkjXz9t9L6Q8T7QKFv1JCpW0u`;
 
     // Обработка ошибок авторизации
     window.handleAuthError = function(error) {
