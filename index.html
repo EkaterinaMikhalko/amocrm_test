@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сделки</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .auth-button {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Сделки</h1>
+    <div class="auth-button">
+        <script
+            class="amocrm_oauth"
+            charset="utf-8"
+            data-name="Integration name"
+            data-description="Integration description"
+            data-redirect_uri="http://localhost:5500/callback"
+            data-secrets_uri="http://localhost:5500/secrets"
+            data-logo="#"
+            data-scopes="crm,notifications"
+            data-title="Авторизоваться через amoCRM"
+            data-compact="false"
+            data-class-name="className"
+            data-color="default"
+            data-state="state"
+            data-error-callback="handleAuthError"
+            data-mode="popup"
+            src="https://www.amocrm.ru/auth/button.min.js"
+        ></script>
+    </div>
+    <table id="dealsTable">
+        <thead>
+            <tr>
+                <th>ID сделки</th>
+                <th>Название сделки</th>
+                <th>Бюджет</th>
+                <th>Название контакта</th>
+                <th>Телефон</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Строки будут добавляться сюда -->
+        </tbody>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+</html>
