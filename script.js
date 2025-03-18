@@ -1,13 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const dealsTableBody = document.querySelector('#dealsTable tbody');
-    const accessToken = `xy5IUF7GXKKe0pTQq5z1Mz5vRK7dgcIyjLNsEjKQkjXz9t9L6Q8T7QKFv1JCpW0u`;
+    let accessToken = null;
 
-    if (accessToken) {
-        console.log('Токен получен:', accessToken);
-        // Используйте токен для запросов к API amoCRM
-    } else {
-        console.log('Токен отсутствует. Необходима авторизация.');
-    }
     // Обработка ошибок авторизации
     window.handleAuthError = function(error) {
         console.error('Ошибка авторизации:', error);
@@ -19,10 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return urlParams.get('access_token');
     }
 
-    // Проверка наличия токена и инициализация загрузки данных
+    // Инициализация при загрузке страницы
     function init() {
         accessToken = getAccessTokenFromUrl();
         if (accessToken) {
+            console.log('Токен получен:', accessToken);
             fetchDealsAndContacts();
         } else {
             console.log('Токен отсутствует. Необходима авторизация.');
@@ -123,6 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Инициализация при загрузке страницы
-    init();
+    // Обработчик для кнопки авторизации
+    const authButton = document.querySelector('.amocrm_oauth');
+    authButton.addEventListener('click', function() {
+        // После успешной авторизации и получения токена, загрузим данные
+        init();
+    });
 });
