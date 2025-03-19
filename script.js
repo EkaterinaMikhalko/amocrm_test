@@ -1,33 +1,71 @@
 document.addEventListener('DOMContentLoaded', function() {
     const dealsTableBody = document.querySelector('#dealsTable tbody');
     let accessToken = null;
+    let refreshToken = null;
 
     // Обработка ошибок авторизации
     window.handleAuthError = function(error) {
         console.error('Ошибка авторизации:', error);
     };
 
-    // Функция для получения токена из URL (после авторизации)
-    function getAccessTokenFromUrl() {
-        const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
-        const token = urlParams.get('access_token');
-        if (token) {
-            console.log('Токен получен из URL:', token);
-            return token;
+    // Функция для получения authorization code из URL
+    function getAuthorizationCodeFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (code) {
+            console.log('Authorization code получен из URL:', code);
+            return code;
         } else {
-            console.log('Токен отсутствует в URL.');
+            console.log('Authorization code отсутствует в URL.');
             return null;
+        }
+    }
+
+    // Функция для обмена authorization code на токены
+    async function exchangeCodeForTokens(code) {
+        try {
+            const response = await fetch('https://kattie.amocrm.ru/oauth2/access_token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    client_id: 'b4077d06-4684-40c3-8b21-dee9b1c58aa7',
+                    client_secret: 'ваш_client_secret', // Замените на ваш client_secret
+                    grant_type: 'authorization_code',
+                    code: code,
+                    redirect_uri: 'https://ваш_сайт/callback' // Замените на ваш redirect_uri
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Токены получены:', data);
+
+            accessToken = data.access_token;
+            refreshToken = data.refresh_token;
+
+            // Сохраняем токены (например, в localStorage)
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+
+            // Загружаем данные
+            fetchDealsAndContacts();
+        } catch (error) {
+            console.error('Ошибка при обмене кода на токены:', error);
         }
     }
 
     // Инициализация при загрузке страницы
     function init() {
-        accessToken = getAccessTokenFromUrl();
-        if (accessToken) {
-            console.log('Токен:', accessToken);
-            fetchDealsAndContacts();
+        const code = getAuthorizationCodeFromUrl();
+        if (code) {
+            exchangeCodeForTokens(code);
         } else {
-            console.log('Токен отсутствует. Необходима авторизация.');
+            console.log('Authorization code отсутствует. Необходима авторизация.');
         }
     }
 
@@ -150,13 +188,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (authButton) {
         authButton.addEventListener('click', function() {
             console.log('Кнопка авторизации нажата.');
-            // После успешной авторизации и получения токена, загрузим данные
+            // После успешной авторизации и получения кода, загрузим данные
             init();
         });
     } else {
         console.error('Кнопка авторизации не найдена.');
     }
 
-    // Автоматически вызываем init при загрузке страницы, если токен уже есть
+    // Автоматически вызываем init при загрузке страницы, если есть код авторизации
     init();
 });
