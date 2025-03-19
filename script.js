@@ -21,10 +21,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Функция для обмена authorization code на токены
+    // Функция для обмена authorization code на токены через прокси
     async function exchangeCodeForTokens(code) {
         try {
-            const response = await fetch('https://kattie.amocrm.ru/oauth2/access_token', {
+            const response = await fetch('http://localhost:3000/proxy/oauth2/access_token', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     client_secret: 'ваш_client_secret', // Замените на ваш client_secret
                     grant_type: 'authorization_code',
                     code: code,
-                    redirect_uri: 'https://ваш_сайт/callback' // Замените на ваш redirect_uri
+                    redirect_uri: 'https://ekaterinamikhalko.github.io/callback' // Замените на ваш redirect_uri
                 })
             });
 
@@ -69,11 +69,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Функция для получения данных о сделках и контактах
+    // Функция для получения данных о сделках и контактах через прокси
     async function fetchDealsAndContacts() {
         try {
             console.log('Загрузка данных о сделках...');
-            const dealsResponse = await fetch('https://kattie.amocrm.ru/api/v4/leads', {
+            const dealsResponse = await fetch('http://localhost:3000/proxy/api/v4/leads', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             for (const deal of dealsData._embedded.leads) {
                 console.log('Загрузка данных о контакте для сделки:', deal.id);
-                const contactResponse = await fetch(`https://kattie.amocrm.ru/api/v4/contacts/${deal.contact_id}`, {
+                const contactResponse = await fetch(`http://localhost:3000/proxy/api/v4/contacts/${deal.contact_id}`, {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     }
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Функция для раскрытия деталей сделки
+    // Функция для раскрытия деталей сделки через прокси
     async function expandDealDetails(dealId, row) {
         const loadingSpinner = document.createElement('div');
         loadingSpinner.className = 'loading';
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
         row.appendChild(loadingSpinner);
 
         try {
-            const dealDetailsResponse = await fetch(`https://kattie.amocrm.ru/api/v4/leads/${dealId}`, {
+            const dealDetailsResponse = await fetch(`http://localhost:3000/proxy/api/v4/leads/${dealId}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const dealDetails = await dealDetailsResponse.json();
 
-            const taskResponse = await fetch(`https://kattie.amocrm.ru/api/v4/tasks?filter[entity_id]=${dealId}`, {
+            const taskResponse = await fetch(`http://localhost:3000/proxy/api/v4/tasks?filter[entity_id]=${dealId}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
