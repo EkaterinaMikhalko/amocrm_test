@@ -1,5 +1,6 @@
-const express = require('express');
-const fetch = require('node-fetch'); // Убедитесь, что установлена версия 2.x
+import express from 'express';
+import fetch from 'node-fetch'; // Убедитесь, что node-fetch установлен
+
 const app = express();
 const port = 3000;
 
@@ -25,10 +26,10 @@ app.post('/proxy/oauth2/access_token', async (req, res) => {
             },
             body: JSON.stringify({
                 client_id: 'b4077d06-4684-40c3-8b21-dee9b1c58aa7',
-                client_secret: 'ваш_client_secret', // Замените на ваш client_secret
+                client_secret: 'https://ekaterinamikhalko.github.io/callback/secret', 
                 grant_type: 'authorization_code',
                 code: req.body.code,
-                redirect_uri: 'https://ekaterinamikhalko.github.io/callback' // Замените на ваш redirect_uri
+                redirect_uri: 'https://ekaterinamikhalko.github.io/callback' 
             })
         });
 
