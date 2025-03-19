@@ -1,5 +1,6 @@
-const express = require('express');
-const fetch = require('node-fetch');
+import express from 'express';
+import fetch from 'node-fetch';
+
 const app = express();
 const port = 3000;
 
@@ -11,16 +12,20 @@ app.use((req, res, next) => {
 });
 
 // Прокси для запросов к amoCRM
-app.use('/proxy', async (req, res) => {
+app.post('/proxy/oauth2/access_token', async (req, res) => {
     try {
-        const url = 'https://kattie.amocrm.ru' + req.url;
-        const response = await fetch(url, {
-            method: req.method,
+        const response = await fetch('https://kattie.amocrm.ru/oauth2/access_token', {
+            method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': req.headers.authorization
+                'Content-Type': 'application/json'
             },
-            body: req.method === 'POST' ? JSON.stringify(req.body) : undefined
+            body: JSON.stringify({
+                client_id: 'b4077d06-4684-40c3-8b21-dee9b1c58aa7',
+                client_secret: 'ваш_client_secret', // Замените на ваш client_secret
+                grant_type: 'authorization_code',
+                code: req.body.code,
+                redirect_uri: 'https://ekaterinamikhalko.github.io/callback' // Замените на ваш redirect_uri
+            })
         });
 
         const data = await response.json();
