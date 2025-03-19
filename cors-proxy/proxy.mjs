@@ -1,6 +1,5 @@
-import express from 'express';
-import fetch from 'node-fetch';
-
+const express = require('express');
+const fetch = require('node-fetch'); // Убедитесь, что установлена версия 2.x
 const app = express();
 const port = 3000;
 
@@ -11,9 +10,14 @@ app.use((req, res, next) => {
     next();
 });
 
+// Middleware для обработки JSON-тела запроса
+app.use(express.json());
+
 // Прокси для запросов к amoCRM
 app.post('/proxy/oauth2/access_token', async (req, res) => {
     try {
+        console.log('Получен запрос:', req.body);
+
         const response = await fetch('https://kattie.amocrm.ru/oauth2/access_token', {
             method: 'POST',
             headers: {
@@ -28,11 +32,19 @@ app.post('/proxy/oauth2/access_token', async (req, res) => {
             })
         });
 
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Ошибка от amoCRM:', errorData);
+            throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log('Токены получены:', data);
+
         res.json(data);
     } catch (error) {
         console.error('Ошибка прокси:', error);
-        res.status(500).json({ error: 'Ошибка прокси' });
+        res.status(500).json({ error: 'Ошибка прокси', details: error.message });
     }
 });
 
